@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Weex to Vue</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+  <link href="https://unpkg.com/codemirror@5.42.0/lib/codemirror.css" rel="stylesheet">
+  <link href="https://unpkg.com/codemirror@5.42.0/theme/monokai.css" rel="stylesheet">
+
+  <script src="https://unpkg.com/codemirror@5.42.0/lib/codemirror.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/addon/mode/overlay.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/mode/xml/xml.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/mode/css/css.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/mode/htmlmixed/htmlmixed.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/mode/vue/vue.js"></script>
+  <script src="https://unpkg.com/codemirror@5.42.0/mode/javascript/javascript.js"></script>
+
+  <script src="https://unpkg.com/vue@2.5.17/dist/vue.min.js"></script>
+  <script src="https://unpkg.com/vue-codemirror@4.0.6/dist/vue-codemirror.js"></script>
+  <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+  <!-- <script src="https://unpkg.com/regular2vue/dist/r2v.js"></script> -->
+  <script src="../dist/w2v.js"></script>
+</head>
+<body>
+<div id="app">
+  <el-container>
+    <el-main>
+      <el-tabs v-model="mode">
+        <el-tab-pane label="TEMPLATE" name="template">
+          <el-row>
+            <el-col :span="12">
+              <el-card header="input">
+                <codemirror 
+                  v-model="templateInput"
+                  :options="codeEditorOptions"
+                  @input="onTemplateInputChange"
+                />
+              </el-card>
+            </el-col>
+            <el-col :span="12">
+              <el-card header="output">
+                <codemirror
+                  :options="codeEditorOptions"
+                  :value="templateOutput"
+                />
+              </el-card>
+            </el-col>
+          </el-row>
+        </el-tab-pane>
+      </el-tabs>
+    </el-main>
+  </el-container>
+</div>
+<script>
+  Vue.use(window.VueCodemirror)
+
+  new Vue({
+    el: '#app',
+    data: {
+      mode: 'template',
+      templateInput: '',
+      templateOutput: '',
+      scriptInput: '',
+      codeEditorOptions: {
+        foldGutter: true,
+        lineNumbers: true,
+        mode: 'vue',
+        theme: 'monokai',
+      },
+      modifiedResult: []
+    },
+    created() {
+      this.templateInput = `<div><text>Vue</text><image src="./jpg.png"></div>`;
+      this.transformTemplate();
+    },
+    methods: {
+      onTemplateInputChange() {
+        this.transformTemplate();
+      },
+      transformTemplate() {
+        const res = w2v.transform(this.templateInput);
+        if (res.error) {
+          this.templateOutput = res.error.toString();
+        } else {
+          this.templateOutput = res.prettified || res.raw;
+        }
+        console.log('transformTemplate', res);
+      },
+    },
+  })
+</script>
+<style>
+h2 {
+  text-align: center;
+}
+.CodeMirror {
+  height: 70vh; 
+}
+</style>
+</body>
+</html>
